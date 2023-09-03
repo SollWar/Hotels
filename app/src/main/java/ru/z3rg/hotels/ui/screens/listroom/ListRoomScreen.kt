@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -115,7 +115,7 @@ fun ListRoomScreen(
                             Icon(
                                 modifier = Modifier
                                     .padding(start = 2.dp, end = 2.dp),
-                                imageVector = Icons.Default.ArrowForward,
+                                imageVector = Icons.Default.KeyboardArrowRight,
                                 contentDescription = "Перейти",
                                 tint = Blue
                             )

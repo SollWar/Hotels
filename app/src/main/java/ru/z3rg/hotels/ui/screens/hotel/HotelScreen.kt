@@ -1,11 +1,10 @@
 package ru.z3rg.hotels.ui.screens.hotel
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
@@ -15,29 +14,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.z3rg.hotels.R
-import ru.z3rg.hotels.ui.theme.*
+import ru.z3rg.hotels.ui.screens.share.Description
+import ru.z3rg.hotels.ui.screens.share.ImagesViewer
+import ru.z3rg.hotels.ui.screens.share.Price
+import ru.z3rg.hotels.ui.screens.share.Tags
+import ru.z3rg.hotels.ui.theme.BackGray
+import ru.z3rg.hotels.ui.theme.GrayText
+import ru.z3rg.hotels.ui.theme.HyperText
 
 @Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3000px,dpi=440")
 @Composable
 fun HotelScreen() {
 
-    val tagsArray = arrayOf(
+    val tagsArray = listOf(
         "3-я линия",
         "Бесплатный Wifi на всей территории отеля",
         "30 км до аэропорта",
         "1 км до пляжа"
     )
 
-    val images = arrayOf(
+    val images = listOf(
         painterResource(id = R.drawable.hotel_paceholder),
         painterResource(id = R.drawable.hotel_paceholder),
         painterResource(id = R.drawable.hotel_paceholder),
@@ -68,80 +70,26 @@ fun HotelScreen() {
         ) {
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .background(Color.White)
             ) {
                 Column {
                     ImagesViewer(
                         images = images
                     )
-                    Row(
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .height(30.dp)
-                            .background(BackYellow),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .padding(start = 10.dp, top = 7.dp, bottom = 7.dp)
-                                .height(15.dp)
-                                .width(15.dp),
-                            painter = painterResource(id = R.drawable.star),
-                            contentDescription = "Star",
-                            tint = Yellow
-                        )
-                        Text(
-                            modifier = Modifier
-                                .padding(start = 2.dp, end = 10.dp),
-                            text = "5 Превосходно",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                color = Yellow
-                            )
-                        )
-                    }
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-                        text = "Steigenberger Makadi",
-                        style = TextStyle(
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Description(
+                        rating = 5,
+                        ratingName = "Превосходно",
+                        address = "Madinat Makadi, Safaga Road, Makadi Bay, Египет",
+                        name = "Лучший пятизвездочный отель в Хургаде, Египет"
                     )
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                        text = "Madinat Makadi, Safaga Road, Makadi Bay, Египет",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            color = HyperText
-                        )
-                    )
-                    Row(
+                    Price(
                         modifier = Modifier
                             .padding(start = 16.dp, end = 16.dp, bottom = 19.dp),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Text(
-                            text = "от 134 673 ₽",
-                            style = TextStyle(
-                                fontSize = 30.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                        Text(
-                            modifier = Modifier
-                                .padding(start = 8.dp),
-                            text = "за тур с перелётом",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                color = GrayText
-                            )
-                        )
-                    }
+                        textPrePrice = "от ",
+                        textPrice = 134268,
+                        textForWhat = "За тур с перелётом"
+                    )
                 }
             }
             Box(
@@ -221,6 +169,7 @@ fun HotelScreen() {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = HyperText
                 ),
+                shape = RoundedCornerShape(10.dp),
                 onClick = {
 
                 }
@@ -230,116 +179,6 @@ fun HotelScreen() {
                     style = TextStyle(
                         fontSize = 16.sp
                     )
-                )
-            }
-        }
-    }
-}
-
-@Preview(backgroundColor = 0xFFFEFEFE, showBackground = true)
-@Composable
-fun ImageViewerPreview(
-    images: Array<Painter> = arrayOf(
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder)
-    )
-) {
-    ImagesViewer(
-        images = images
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ImagesViewer(
-    images: Array<Painter>
-) {
-    val pagerState = rememberPagerState()
-
-    Box {
-        HorizontalPager(
-            pageCount = images.size,
-            state = pagerState
-        ) {
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .height(258.dp)
-                    .clip(RoundedCornerShape(20.dp)),
-                contentScale = ContentScale.Crop,
-                painter = images[it],
-                contentDescription = "Hotel Image"
-            )
-        }
-        Box(
-            modifier = Modifier
-                .padding(bottom = 8.dp)
-                .clip(RoundedCornerShape(5.dp))
-                .background(Color.White)
-                .height(17.dp)
-                .align(alignment = Alignment.BottomCenter)
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 5.dp)
-            ) {
-                repeat(images.size) {
-                    val color = if (pagerState.currentPage == it) Color.Black else GrayText
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 5.dp, vertical = 5.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .width(7.dp)
-                            .height(7.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Preview(backgroundColor = 0xFFFEFEFE, showBackground = true)
-@Composable
-fun TagsPreview(
-    tagsArray: Array<String> = arrayOf(
-        "3-я линия",
-        "Платный Wi-Fi в фойе",
-        "30 км до аэропорта",
-        "1 км до пляжа"
-    )
-) {
-    Tags(tagsArray = tagsArray)
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun Tags(
-    tagsArray: Array<String>
-) {
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        tagsArray.forEach {
-            Box(
-                modifier = Modifier
-                    .padding(end = 8.dp, bottom = 8.dp)
-            ) {
-                Text(
-                    modifier = Modifier
-                        .background(BackGray)
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    text = it,
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Start,
-                        color = GrayText
-                    ),
-                    maxLines = 1
                 )
             }
         }

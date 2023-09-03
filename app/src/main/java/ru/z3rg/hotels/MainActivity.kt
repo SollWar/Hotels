@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ru.z3rg.hotels.ui.screens.hotel.HotelScreen
+import ru.z3rg.hotels.ui.screens.listroom.ListRoomScreenPreview
 import ru.z3rg.hotels.ui.theme.BackGray
 import ru.z3rg.hotels.ui.theme.HotelsTheme
 
@@ -21,6 +22,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = BackGray) {
                     HotelScreen()
+                    //ListRoomScreenPreview()
                 }
             }
         }

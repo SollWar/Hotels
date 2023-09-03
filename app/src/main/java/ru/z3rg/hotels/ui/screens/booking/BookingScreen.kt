@@ -1,6 +1,8 @@
 package ru.z3rg.hotels.ui.screens.booking
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,26 +10,27 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import ru.z3rg.hotels.ui.screens.booking.components.LazyTextField
 import ru.z3rg.hotels.ui.screens.share.Description
 import ru.z3rg.hotels.ui.theme.Blue
 import ru.z3rg.hotels.ui.theme.Blue10
 import ru.z3rg.hotels.ui.theme.GrayText
+import kotlin.math.roundToInt
 
 data class BookingItem(
     val hotelName: String,
@@ -46,20 +49,63 @@ data class BookingItem(
     val serviceCharge: Int
 )
 
-class TouristList(
-    val list: MutableList<String> = mutableListOf()
+data class TouristData(
+    var number: String = "",
+    var firstName: String = "",
+    var secondName: String = "",
+    var dateOfBirth: String = "",
+    var nationality: String = "",
+    var pasNumber: String = "",
+    var pasValidPeriod: String = ""
 )
+
+data class TouristList(
+    val list: MutableList<TouristData> = mutableListOf()
+) {
+    fun addTourist() {
+        when (list.size) {
+            0 -> list.add(TouristData(number = "Первый турист"))
+            1 -> list.add(TouristData(number = "Второй турист"))
+            2 -> list.add(TouristData(number = "Третий турист"))
+            3 -> list.add(TouristData(number = "Четвертый турист"))
+            4 -> list.add(TouristData(number = "Пятый турист"))
+            5 -> list.add(TouristData(number = "Шестой турист"))
+            6 -> list.add(TouristData(number = "Седьмой турист"))
+            7 -> list.add(TouristData(number = "Восьмой турист"))
+            else -> list.add(TouristData(number = "${list.size} турист"))
+        }
+    }
+
+    fun deleteTourist(tourist: TouristData) {
+        list.remove(tourist)
+        repeat(list.size) {
+            when (it) {
+                0 -> list[it].number = "Первый турист"
+                1 -> list[it].number = "Второй турист"
+                2 -> list[it].number = "Третий турист"
+                3 -> list[it].number = "Четвертый турист"
+                4 -> list[it].number = "Пятый турист"
+                5 -> list[it].number = "Шестой турист"
+                6 -> list[it].number = "Седьмой турист"
+                7 -> list[it].number = "Восьмой турист"
+                else -> list[it].number = "${list.size} турист"
+            }
+        }
+    }
+}
 
 @Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3800px,dpi=440")
 @Composable
 fun BookingScreen() {
-    var touristList by remember{ mutableStateOf(
-        TouristList(
-            mutableListOf(
-                "Первый турист"
+    val touristList by remember {
+        mutableStateOf(
+            TouristList(
+                mutableStateListOf(
+                    TouristData(number = "Первый турист")
+                )
             )
         )
-    ) }
+    }
 
     Box {
         Box(
@@ -98,10 +144,13 @@ fun BookingScreen() {
                 )
             }
         }
+        val scrollState = rememberScrollState()
+        val coroutineScope = rememberCoroutineScope()
+        var scrollAddPosition by remember { mutableStateOf(0F) }
         Column(
             modifier = Modifier
                 .padding(top = 66.dp, bottom = 8.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             Description(
                 modifier = Modifier
@@ -133,24 +182,36 @@ fun BookingScreen() {
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White)
             )
-            touristList.list.forEach {
-                Tourist(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.White),
-                    textTop = it
-                )
+            Column(
+                modifier = Modifier
+                    .animateContentSize()
+            ) {
+                Log.d("NewList", touristList.list.toString())
+                touristList.list.forEach {
+                    Tourist(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White),
+                        onDeleteClick = {
+                            touristList.deleteTourist(it)
+                        },
+                        tourist = it
+                    )
+                }
             }
             AddTourist(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White),
+                    .background(Color.White)
+                    .onGloballyPositioned { cord ->
+                        scrollAddPosition = cord.positionInParent().y
+                    },
                 onAddClick = {
-                    touristList.list.add("Второй турист")
-                    touristList = TouristList(
-                        list = touristList.list
-                    )
+                    touristList.addTourist()
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(scrollAddPosition.roundToInt())
+                    }
                 }
             )
         }
@@ -177,7 +238,7 @@ fun CustomerInfo(
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             value = "+7 (951) 555-99-00",
-            labelText = "Номер телефона"
+            labelText = "Номер телефона",
         )
         LazyTextField(
             modifier = Modifier
@@ -200,9 +261,10 @@ fun CustomerInfo(
 @Composable
 fun Tourist(
     modifier: Modifier = Modifier,
-    textTop: String
+    onDeleteClick: () -> Unit = {},
+    tourist: TouristData
 ) {
-    var collapse by remember{ mutableStateOf(false) }
+    var collapse by remember { mutableStateOf(false) }
     Column(
         modifier = modifier
     ) {
@@ -214,7 +276,7 @@ fun Tourist(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = textTop,
+                text = tourist.number,
                 style = TextStyle(
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -230,7 +292,7 @@ fun Tourist(
                         collapse = !collapse
                     },
                 imageVector = if (!collapse) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                contentDescription = "Перейти",
+                contentDescription = "Раскрыть",
                 tint = Blue
             )
         }
@@ -240,37 +302,69 @@ fun Tourist(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Имя",
-                    value = "Иван"
+                    value = tourist.firstName,
+                    onValueChange = {
+                        tourist.firstName = it
+                    }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Фамилия",
-                    value = "Иванов"
+                    value = tourist.secondName,
+                    onValueChange = {
+                        tourist.secondName = it
+                    }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Дата рождения",
-                    value = ""
+                    value = tourist.dateOfBirth,
+                    onValueChange = {
+                        tourist.dateOfBirth = it
+                    }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Гражданство",
-                    value = ""
+                    value = tourist.nationality,
+                    onValueChange = {
+                        tourist.nationality = it
+                    }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Номер загранпаспорта",
-                    value = ""
+                    value = tourist.pasNumber,
+                    onValueChange = {
+                        tourist.pasNumber = it
+                    }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     labelText = "Срок действия загранпаспорта",
-                    value = ""
+                    value = tourist.pasValidPeriod,
+                    onValueChange = {
+                        tourist.pasValidPeriod = it
+                    }
+                )
+                Icon(
+                    modifier = Modifier
+                        .padding(bottom = 8.dp, start = 16.dp, end = 16.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .width(32.dp)
+                        .height(32.dp)
+                        .background(Color.Red)
+                        .clickable {
+                            onDeleteClick()
+                        },
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Удалить",
+                    tint = Color.White
                 )
             }
         }
@@ -285,7 +379,7 @@ fun TouristPreview() {
             .fillMaxWidth()
     ) {
         Tourist(
-            textTop = "Первый турист"
+            tourist = TouristData(number = "Первый турист")
         )
     }
 }

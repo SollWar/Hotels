@@ -7,7 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -21,13 +21,15 @@ import ru.z3rg.hotels.ui.theme.TextFieldBack
 fun LazyTextField(
     modifier: Modifier = Modifier,
     value: String,
-    labelText: String
+    labelText: String,
+    onValueChange: (it: String) -> Unit = {}
 ) {
+    var valueText by remember{ mutableStateOf(value) }
     TextField(
         modifier = modifier
             .height(52.dp)
             .fillMaxWidth(),
-        value = value,
+        value = valueText,
         shape = RoundedCornerShape(10.dp),
         singleLine = true,
         textStyle = TextStyle(
@@ -49,7 +51,8 @@ fun LazyTextField(
             )
         },
         onValueChange = {
-
+            valueText = it
+            onValueChange(it)
         }
     )
 }

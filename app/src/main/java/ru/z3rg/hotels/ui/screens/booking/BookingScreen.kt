@@ -1,23 +1,33 @@
 package ru.z3rg.hotels.ui.screens.booking
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.z3rg.hotels.ui.screens.booking.components.LazyTextField
 import ru.z3rg.hotels.ui.screens.share.Description
+import ru.z3rg.hotels.ui.theme.Blue
+import ru.z3rg.hotels.ui.theme.Blue10
 import ru.z3rg.hotels.ui.theme.GrayText
-import ru.z3rg.hotels.ui.theme.TextFieldBack
 
 data class BookingItem(
     val hotelName: String,
@@ -36,9 +46,21 @@ data class BookingItem(
     val serviceCharge: Int
 )
 
-@Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3400px,dpi=440")
+class TouristList(
+    val list: MutableList<String> = mutableListOf()
+)
+
+@Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3800px,dpi=440")
 @Composable
 fun BookingScreen() {
+    var touristList by remember{ mutableStateOf(
+        TouristList(
+            mutableListOf(
+                "Первый турист"
+            )
+        )
+    ) }
+
     Box {
         Box(
             modifier = Modifier
@@ -79,9 +101,11 @@ fun BookingScreen() {
         Column(
             modifier = Modifier
                 .padding(top = 66.dp, bottom = 8.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Description(
                 modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color.White),
                 rating = 5,
                 ratingName = "Превосходно",
@@ -91,6 +115,7 @@ fun BookingScreen() {
             TotalRoom(
                 modifier = Modifier
                     .padding(top = 8.dp)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color.White)
                     .fillMaxWidth(),
                 departure = "Москва",
@@ -105,13 +130,33 @@ fun BookingScreen() {
             CustomerInfo(
                 modifier = Modifier
                     .padding(bottom = 8.dp, top = 8.dp)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color.White)
+            )
+            touristList.list.forEach {
+                Tourist(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White),
+                    textTop = it
+                )
+            }
+            AddTourist(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.White),
+                onAddClick = {
+                    touristList.list.add("Второй турист")
+                    touristList = TouristList(
+                        list = touristList.list
+                    )
+                }
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerInfo(
     modifier: Modifier
@@ -128,65 +173,17 @@ fun CustomerInfo(
                 fontWeight = FontWeight.Bold
             )
         )
-        TextField(
+        LazyTextField(
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                .height(52.dp)
-                .fillMaxWidth(),
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             value = "+7 (951) 555-99-00",
-            shape = RoundedCornerShape(10.dp),
-            singleLine = true,
-            textStyle = TextStyle(
-                fontSize = 16.sp
-            ),
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = TextFieldBack,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            ),
-            label = {
-                Text(
-                    text = "Номер телефона",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = GrayText
-                    )
-                )
-            },
-            onValueChange = {
-
-            }
+            labelText = "Номер телефона"
         )
-        TextField(
+        LazyTextField(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .height(52.dp)
-                .fillMaxWidth(),
+                .padding(horizontal = 16.dp),
             value = "examplemail.000@mail.ru",
-            shape = RoundedCornerShape(10.dp),
-            singleLine = true,
-            textStyle = TextStyle(
-                fontSize = 16.sp
-            ),
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = TextFieldBack,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            ),
-            label = {
-                Text(
-                    text = "Почта",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = GrayText
-                    )
-                )
-            },
-            onValueChange = {
-
-            }
+            labelText = "Почта"
         )
         Text(
             modifier = Modifier
@@ -196,6 +193,99 @@ fun CustomerInfo(
                 fontSize = 14.sp,
                 color = GrayText
             )
+        )
+    }
+}
+
+@Composable
+fun Tourist(
+    modifier: Modifier = Modifier,
+    textTop: String
+) {
+    var collapse by remember{ mutableStateOf(false) }
+    Column(
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = textTop,
+                style = TextStyle(
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+            Icon(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .width(32.dp)
+                    .height(32.dp)
+                    .background(Blue10)
+                    .clickable {
+                        collapse = !collapse
+                    },
+                imageVector = if (!collapse) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                contentDescription = "Перейти",
+                tint = Blue
+            )
+        }
+        AnimatedVisibility(!collapse) {
+            Column {
+                LazyTextField(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    labelText = "Имя",
+                    value = "Иван"
+                )
+                LazyTextField(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    labelText = "Фамилия",
+                    value = "Иванов"
+                )
+                LazyTextField(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    labelText = "Дата рождения",
+                    value = ""
+                )
+                LazyTextField(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    labelText = "Гражданство",
+                    value = ""
+                )
+                LazyTextField(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    labelText = "Номер загранпаспорта",
+                    value = ""
+                )
+                LazyTextField(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    labelText = "Срок действия загранпаспорта",
+                    value = ""
+                )
+            }
+        }
+    }
+}
+
+@Preview(backgroundColor = 0xFFFEFEFE, showBackground = true)
+@Composable
+fun TouristPreview() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Tourist(
+            textTop = "Первый турист"
         )
     }
 }
@@ -273,6 +363,42 @@ fun TotalRoom(
         }
     }
 }
+
+@Composable
+fun AddTourist(
+    modifier: Modifier = Modifier,
+    onAddClick: () -> Unit = {}
+) {
+    Row(
+        modifier = modifier
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "Добавить туриста",
+            style = TextStyle(
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        Icon(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .width(32.dp)
+                .height(32.dp)
+                .background(Blue)
+                .clickable {
+                    onAddClick()
+                },
+            imageVector = Icons.Default.Add,
+            contentDescription = "Перейти",
+            tint = Color.White
+        )
+    }
+}
+
 
 @Composable
 fun TotalRoomItem(

@@ -1,6 +1,5 @@
 package ru.z3rg.hotels.ui.screens.booking
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -11,7 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.z3rg.hotels.ui.screens.booking.components.LazyTextField
 import ru.z3rg.hotels.ui.screens.share.Description
@@ -50,7 +51,6 @@ data class BookingItem(
 )
 
 data class TouristData(
-    var number: String = "",
     var firstName: String = "",
     var secondName: String = "",
     var dateOfBirth: String = "",
@@ -59,53 +59,10 @@ data class TouristData(
     var pasValidPeriod: String = ""
 )
 
-data class TouristList(
-    val list: MutableList<TouristData> = mutableListOf()
-) {
-    fun addTourist() {
-        when (list.size) {
-            0 -> list.add(TouristData(number = "Первый турист"))
-            1 -> list.add(TouristData(number = "Второй турист"))
-            2 -> list.add(TouristData(number = "Третий турист"))
-            3 -> list.add(TouristData(number = "Четвертый турист"))
-            4 -> list.add(TouristData(number = "Пятый турист"))
-            5 -> list.add(TouristData(number = "Шестой турист"))
-            6 -> list.add(TouristData(number = "Седьмой турист"))
-            7 -> list.add(TouristData(number = "Восьмой турист"))
-            else -> list.add(TouristData(number = "${list.size} турист"))
-        }
-    }
-
-    fun deleteTourist(tourist: TouristData) {
-        list.remove(tourist)
-        repeat(list.size) {
-            when (it) {
-                0 -> list[it].number = "Первый турист"
-                1 -> list[it].number = "Второй турист"
-                2 -> list[it].number = "Третий турист"
-                3 -> list[it].number = "Четвертый турист"
-                4 -> list[it].number = "Пятый турист"
-                5 -> list[it].number = "Шестой турист"
-                6 -> list[it].number = "Седьмой турист"
-                7 -> list[it].number = "Восьмой турист"
-                else -> list[it].number = "${list.size} турист"
-            }
-        }
-    }
-}
-
 @Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3800px,dpi=440")
 @Composable
 fun BookingScreen() {
-    val touristList by remember {
-        mutableStateOf(
-            TouristList(
-                mutableStateListOf(
-                    TouristData(number = "Первый турист")
-                )
-            )
-        )
-    }
+    val touristList = remember { mutableStateListOf(TouristData()) }
 
     Box {
         Box(
@@ -186,35 +143,52 @@ fun BookingScreen() {
                 modifier = Modifier
                     .animateContentSize()
             ) {
-                Log.d("NewList", touristList.list.toString())
-                touristList.list.forEach {
-                    Tourist(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color.White),
-                        onDeleteClick = {
-                            touristList.deleteTourist(it)
-                        },
-                        tourist = it
-                    )
+                touristList.forEachIndexed { index, it ->
+                    key(it) {
+                        Tourist(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color.White),
+                            onDeleteClick = {
+                                touristList.remove(it)
+                            },
+                            tourist = it,
+                            touristNumber = numberTouristFromIndex(index)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
             AddTourist(
                 modifier = Modifier
-                    .padding(top = 8.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White)
                     .onGloballyPositioned { cord ->
                         scrollAddPosition = cord.positionInParent().y
                     },
                 onAddClick = {
-                    touristList.addTourist()
+                    touristList.add(TouristData())
                     coroutineScope.launch {
+                        delay(20)
                         scrollState.animateScrollTo(scrollAddPosition.roundToInt())
                     }
                 }
             )
         }
+    }
+}
+
+fun numberTouristFromIndex(index: Int): String {
+    return when (index) {
+        0 -> "Первый турист"
+        1 -> "Второй турист"
+        2 -> "Третий турист"
+        3 -> "Четвертый турист"
+        4 -> "Пятый турист"
+        5 -> "Шестой турист"
+        6 -> "Седьмой турист"
+        7 -> "Восьмой турист"
+        else -> "$index турист"
     }
 }
 
@@ -262,6 +236,7 @@ fun CustomerInfo(
 fun Tourist(
     modifier: Modifier = Modifier,
     onDeleteClick: () -> Unit = {},
+    touristNumber: String,
     tourist: TouristData
 ) {
     var collapse by remember { mutableStateOf(false) }
@@ -276,7 +251,7 @@ fun Tourist(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = tourist.number,
+                text = touristNumber,
                 style = TextStyle(
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -379,7 +354,8 @@ fun TouristPreview() {
             .fillMaxWidth()
     ) {
         Tourist(
-            tourist = TouristData(number = "Первый турист")
+            tourist = TouristData(),
+            touristNumber = "Первый турист"
         )
     }
 }

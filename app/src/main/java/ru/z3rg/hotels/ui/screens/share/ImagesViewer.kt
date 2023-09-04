@@ -43,24 +43,32 @@ fun ImagesViewer(
     modifier: Modifier = Modifier,
     images: List<Painter>
 ) {
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState { images.size }
 
     Box(
         modifier = modifier
     ) {
         HorizontalPager(
-            pageCount = images.size,
             state = pagerState
         ) {
-            Image(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth(0.92f)
-                    .height(258.dp)
-                    .clip(RoundedCornerShape(20.dp)),
-                contentScale = ContentScale.Crop,
-                painter = images[it],
-                contentDescription = "Hotel Image"
-            )
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Spacer(modifier = Modifier.width(1.dp))
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f)
+                        .height(258.dp)
+                        .clip(RoundedCornerShape(20.dp)),
+                    contentScale = ContentScale.Crop,
+                    painter = images[it],
+                    contentDescription = "Hotel Image"
+                )
+                Spacer(modifier = Modifier.width(1.dp))
+            }
+
         }
         Box(
             modifier = Modifier

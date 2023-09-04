@@ -8,8 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,11 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.z3rg.hotels.R
 import ru.z3rg.hotels.ui.screens.share.ImagesViewer
+import ru.z3rg.hotels.ui.screens.share.LazyButton
 import ru.z3rg.hotels.ui.screens.share.Price
 import ru.z3rg.hotels.ui.screens.share.Tags
 import ru.z3rg.hotels.ui.theme.Blue
 import ru.z3rg.hotels.ui.theme.Blue10
-import ru.z3rg.hotels.ui.theme.HyperText
 
 
 data class RoomItem(
@@ -44,7 +42,8 @@ data class RoomItem(
 
 @Composable
 fun ListRoomScreen(
-    roomItems: List<RoomItem>
+    roomItems: List<RoomItem>,
+    onRoomSelectClick: () -> Unit = {}
 ) {
     Box {
         Box(
@@ -126,26 +125,14 @@ fun ListRoomScreen(
                             textPrice = room.price,
                             textForWhat = room.pricePer
                         )
-                        Button(
+                        LazyButton(
                             modifier = Modifier
-                                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = HyperText
-                            ),
-                            shape = RoundedCornerShape(10.dp),
-                            onClick = {
-
+                                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
+                            text = "Выбрать номер",
+                            onButtonClick = {
+                                onRoomSelectClick()
                             }
-                        ) {
-                            Text(
-                                text = "Выбрать номер",
-                                style = TextStyle(
-                                    fontSize = 16.sp
-                                )
-                            )
-                        }
+                        )
                     }
                 }
             }
@@ -155,7 +142,9 @@ fun ListRoomScreen(
 
 @Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3400px,dpi=440")
 @Composable
-fun ListRoomScreenPreview() {
+fun ListRoomScreenPreview(
+    onRoomSelectClick: () -> Unit = {}
+) {
     ListRoomScreen(
         roomItems = listOf(
             RoomItem(
@@ -188,6 +177,9 @@ fun ListRoomScreenPreview() {
                     painterResource(id = R.drawable.hotel_paceholder)
                 )
             )
-        )
+        ),
+        onRoomSelectClick = {
+            onRoomSelectClick()
+        }
     )
 }

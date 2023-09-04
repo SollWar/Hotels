@@ -7,7 +7,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.*
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,17 +22,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.z3rg.hotels.R
-import ru.z3rg.hotels.ui.screens.share.Description
-import ru.z3rg.hotels.ui.screens.share.ImagesViewer
-import ru.z3rg.hotels.ui.screens.share.Price
-import ru.z3rg.hotels.ui.screens.share.Tags
+import ru.z3rg.hotels.ui.screens.share.*
 import ru.z3rg.hotels.ui.theme.BackGray
 import ru.z3rg.hotels.ui.theme.GrayText
-import ru.z3rg.hotels.ui.theme.HyperText
 
 @Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3000px,dpi=440")
 @Composable
-fun HotelScreen() {
+fun HotelScreen(
+    onRoomSelectClick: () -> Unit = {}
+) {
 
     val tagsArray = listOf(
         "3-я линия",
@@ -156,32 +156,14 @@ fun HotelScreen() {
                 }
             }
         }
-        Box(
+        LazyBottomBar(
             modifier = Modifier
-                .background(Color.White)
-                .align(alignment = Alignment.BottomCenter)
-        ) {
-            Button(
-                modifier = Modifier
-                    .padding(vertical = 12.dp, horizontal = 16.dp)
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = HyperText
-                ),
-                shape = RoundedCornerShape(10.dp),
-                onClick = {
-
-                }
-            ) {
-                Text(
-                    text = "К выбору номера",
-                    style = TextStyle(
-                        fontSize = 16.sp
-                    )
-                )
+                .align(alignment = Alignment.BottomCenter),
+            text = "К выбору номера",
+            onButtonClick = {
+                onRoomSelectClick()
             }
-        }
+        )
     }
 }
 

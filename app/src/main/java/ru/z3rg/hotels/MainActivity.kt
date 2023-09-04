@@ -5,11 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import ru.z3rg.hotels.ui.screens.booking.BookingScreen
+import ru.z3rg.hotels.ui.screens.hotel.HotelScreen
+import ru.z3rg.hotels.ui.screens.listroom.ListRoomScreenPreview
+import ru.z3rg.hotels.ui.screens.success.SuccessScreen
 import ru.z3rg.hotels.ui.theme.BackGray
 import ru.z3rg.hotels.ui.theme.HotelsTheme
 
@@ -20,28 +23,36 @@ class MainActivity : ComponentActivity() {
             HotelsTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = BackGray) {
-                    //HotelScreen()
-                    //ListRoomScreenPreview()
-                    //TouristPreview()
-                    BookingScreen()
+                    val navController = rememberNavController()
+
+                    NavHost(navController = navController, startDestination = "hotel") {
+                        composable(route = "hotel") {
+                            HotelScreen(
+                                onRoomSelectClick = {
+                                    navController.navigate(route = "list-room")
+                                }
+                            )
+                        }
+                        composable(route = "list-room") {
+                            ListRoomScreenPreview(
+                                onRoomSelectClick = {
+                                    navController.navigate(route = "booking")
+                                }
+                            )
+                        }
+                        composable(route = "booking") {
+                            BookingScreen(
+                                onCheckoutClick = {
+                                    navController.navigate(route = "success")
+                                }
+                            )
+                        }
+                        composable(route = "success") {
+                            SuccessScreen()
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    HotelsTheme {
-        Greeting("Android")
     }
 }

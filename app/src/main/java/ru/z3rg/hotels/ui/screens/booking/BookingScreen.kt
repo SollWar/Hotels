@@ -21,13 +21,16 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.z3rg.hotels.ui.screens.booking.components.LazyTextField
+import ru.z3rg.hotels.ui.screens.share.LazyTextField
 import ru.z3rg.hotels.ui.screens.share.Description
+import ru.z3rg.hotels.ui.screens.share.LazyBottomBar
+import ru.z3rg.hotels.ui.screens.share.LazyTopBar
 import ru.z3rg.hotels.ui.theme.Blue
 import ru.z3rg.hotels.ui.theme.Blue10
 import ru.z3rg.hotels.ui.theme.GrayText
@@ -59,54 +62,25 @@ data class TouristData(
     var pasValidPeriod: String = ""
 )
 
-@Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3800px,dpi=440")
+@Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=4600px,dpi=440")
 @Composable
-fun BookingScreen() {
+fun BookingScreen(
+    onCheckoutClick: () -> Unit = {}
+) {
     val touristList = remember { mutableStateListOf(TouristData()) }
 
     Box {
-        Box(
+        LazyTopBar(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(58.dp)
-                .background(Color.White)
                 .align(alignment = Alignment.TopCenter),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .width(32.dp)
-                        .height(32.dp),
-                    imageVector = Icons.Default.KeyboardArrowLeft,
-                    contentDescription = "Перейти"
-                )
-                Text(
-                    text = "Бронирование",
-                    style = TextStyle(
-                        fontSize = 18.sp
-                    )
-                )
-                Spacer(
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .width(32.dp)
-                        .height(32.dp)
-                )
-            }
-        }
+            text = "Бронирование"
+        )
         val scrollState = rememberScrollState()
         val coroutineScope = rememberCoroutineScope()
         var scrollAddPosition by remember { mutableStateOf(0F) }
         Column(
             modifier = Modifier
-                .padding(top = 66.dp, bottom = 8.dp)
+                .padding(top = 66.dp, bottom = 78.dp)
                 .verticalScroll(scrollState)
         ) {
             Description(
@@ -174,7 +148,22 @@ fun BookingScreen() {
                     }
                 }
             )
+            ToPay(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.White)
+                    .fillMaxWidth()
+            )
         }
+        LazyBottomBar(
+            modifier = Modifier
+                .align(Alignment.BottomCenter),
+            text = "Оплатить",
+            onButtonClick = {
+                onCheckoutClick()
+            }
+        )
     }
 }
 
@@ -346,29 +335,6 @@ fun Tourist(
     }
 }
 
-@Preview(backgroundColor = 0xFFFEFEFE, showBackground = true)
-@Composable
-fun TouristPreview() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Tourist(
-            tourist = TouristData(),
-            touristNumber = "Первый турист"
-        )
-    }
-}
-
-@Preview(backgroundColor = 0xFFFEFEFE, showBackground = true)
-@Composable
-fun CustomerInfoPreview() {
-    CustomerInfo(
-        modifier = Modifier
-            .fillMaxWidth()
-    )
-}
-
 @Composable
 fun TotalRoom(
     modifier: Modifier = Modifier,
@@ -469,6 +435,76 @@ fun AddTourist(
     }
 }
 
+@Composable
+fun ToPay(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+    ) {
+        PaySum(
+            modifier = modifier
+                .padding(top = 16.dp),
+            text = "Тур",
+            textSum = "186 600 ₽",
+            itTotal = false
+        )
+        PaySum(
+            modifier = modifier
+                .padding(top = 16.dp),
+            text = "Топливный сбор",
+            textSum = "9 300 ₽",
+            itTotal = false
+        )
+        PaySum(
+            modifier = modifier
+                .padding(top = 16.dp),
+            text = "Сервисный сбор",
+            textSum = "2 136 ₽",
+            itTotal = false
+        )
+        PaySum(
+            modifier = modifier
+                .padding(top = 16.dp, bottom = 16.dp),
+            text = "К оплате",
+            textSum = "198 036 ₽",
+            itTotal = true
+        )
+    }
+}
+
+@Composable
+fun PaySum(
+    modifier: Modifier,
+    text: String,
+    textSum: String,
+    itTotal: Boolean
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(start = 16.dp),
+            text = text,
+            style = TextStyle(
+                fontSize = 16.sp,
+                color = GrayText
+            )
+        )
+        Text(
+            modifier = Modifier
+                .padding(end = 16.dp),
+            text = textSum,
+            style = TextStyle(
+                fontSize = 16.sp,
+                textAlign = TextAlign.End,
+                color = if (itTotal) Blue else Color.Black
+            )
+        )
+    }
+}
 
 @Composable
 fun TotalRoomItem(
@@ -499,22 +535,4 @@ fun TotalRoomItem(
             )
         )
     }
-}
-
-@Preview(backgroundColor = 0xFFFEFEFE, showBackground = true)
-@Composable
-fun TotalRoomPreview() {
-    TotalRoom(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        departure = "Москва",
-        arrivalCountry = "Египет, Хургада",
-        tourDateStart = "19.09.2023",
-        tourDateStop = "27.09.2023",
-        numberOfNights = 7,
-        hotelName = "Лучший пятизвездочный отель в Хургаде, Египет",
-        room = "Люкс номер с видом на море",
-        nutrition = "Все включено"
-    )
 }

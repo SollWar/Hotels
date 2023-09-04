@@ -1,4 +1,4 @@
-package ru.z3rg.hotels.ui.screens.booking.components
+package ru.z3rg.hotels.ui.screens.share
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

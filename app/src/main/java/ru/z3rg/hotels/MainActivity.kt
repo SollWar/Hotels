@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ru.z3rg.hotels.ui.screens.booking.BookingScreen
-import ru.z3rg.hotels.ui.screens.hotel.HotelScreen
+import ru.z3rg.hotels.ui.screens.booking.BookingScreenPreview
+import ru.z3rg.hotels.ui.screens.hotel.HotelScreenPreview
 import ru.z3rg.hotels.ui.screens.listroom.ListRoomScreenPreview
 import ru.z3rg.hotels.ui.screens.success.SuccessScreen
 import ru.z3rg.hotels.ui.theme.BackGray
@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(navController = navController, startDestination = "hotel") {
                         composable(route = "hotel") {
-                            HotelScreen(
+                            HotelScreenPreview(
                                 onRoomSelectClick = {
                                     navController.navigate(route = "list-room")
                                 }
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(route = "booking") {
-                            BookingScreen(
+                            BookingScreenPreview(
                                 onCheckoutClick = {
                                     navController.navigate(route = "success")
                                 }

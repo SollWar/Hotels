@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ru.z3rg.domain.models.Booking
+import ru.z3rg.domain.models.TouristData
+import ru.z3rg.hotels.ui.screens.booking.models.BookingScreenState
 import ru.z3rg.hotels.ui.screens.share.LazyTextField
 import ru.z3rg.hotels.ui.screens.share.Description
 import ru.z3rg.hotels.ui.screens.share.LazyBottomBar
@@ -34,37 +37,43 @@ import ru.z3rg.hotels.ui.screens.share.LazyTopBar
 import ru.z3rg.hotels.ui.theme.Blue
 import ru.z3rg.hotels.ui.theme.Blue10
 import ru.z3rg.hotels.ui.theme.GrayText
+import java.text.NumberFormat
 import kotlin.math.roundToInt
 
-data class BookingItem(
-    val hotelName: String,
-    val hotelAddress: String,
-    val horating: Int,
-    val ratingName: String,
-    val departure: String,
-    val arrivalCountry: String,
-    val tourDateStart: String,
-    val tourDateStop: String,
-    val numberOfNights: Int,
-    val room: String,
-    val nutrition: String,
-    val tourPrice: Int,
-    val fuelCharge: Int,
-    val serviceCharge: Int
-)
-
-data class TouristData(
-    var firstName: String = "",
-    var secondName: String = "",
-    var dateOfBirth: String = "",
-    var nationality: String = "",
-    var pasNumber: String = "",
-    var pasValidPeriod: String = ""
-)
 
 @Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=4600px,dpi=440")
 @Composable
+fun BookingScreenPreview(
+    onCheckoutClick: () -> Unit = {}
+) {
+    BookingScreen(
+        state = BookingScreenState.Display(
+            booking = Booking(
+                id = 1,
+                hotelName = "Лучший пятизвездочный отель в Хургаде, Египет",
+                hotelAddress = "Madinat Makadi, Safaga Road, Makadi Bay, Египет",
+                rating = 5,
+                ratingName = "Превосходно",
+                departure = "Москва",
+                arrivalCountry = "Египет, Хургада",
+                tourDateStart = "19.09.2023",
+                tourDateStop = "27.09.2023",
+                numberOfNights = 7,
+                room = "Люкс номер с видом на море",
+                nutrition = "Все включено",
+                tourPrice = 289400,
+                fuelCharge = 9300,
+                serviceCharge = 2150
+            )
+        ),
+        onCheckoutClick = {onCheckoutClick()}
+    )
+}
+
+
+@Composable
 fun BookingScreen(
+    state: BookingScreenState.Display,
     onCheckoutClick: () -> Unit = {}
 ) {
     val touristList = remember { mutableStateListOf(TouristData()) }
@@ -77,7 +86,7 @@ fun BookingScreen(
         )
         val scrollState = rememberScrollState()
         val coroutineScope = rememberCoroutineScope()
-        var scrollAddPosition by remember { mutableStateOf(0F) }
+        var scrollAddPosition by remember { mutableFloatStateOf(0F) }
         Column(
             modifier = Modifier
                 .padding(top = 66.dp, bottom = 78.dp)
@@ -87,10 +96,10 @@ fun BookingScreen(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White),
-                rating = 5,
-                ratingName = "Превосходно",
-                address = "Madinat Makadi, Safaga Road, Makadi Bay, Египет",
-                name = "Лучший пятизвездочный отель в Хургаде, Египет"
+                rating = state.booking.rating,
+                ratingName = state.booking.ratingName,
+                address = state.booking.hotelAddress,
+                name = state.booking.hotelName
             )
             TotalRoom(
                 modifier = Modifier
@@ -98,14 +107,14 @@ fun BookingScreen(
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White)
                     .fillMaxWidth(),
-                departure = "Москва",
-                arrivalCountry = "Египет, Хургада",
-                tourDateStart = "19.09.2023",
-                tourDateStop = "27.09.2023",
-                numberOfNights = 7,
-                hotelName = "Лучший пятизвездочный отель в Хургаде, Египет",
-                room = "Люкс номер с видом на море",
-                nutrition = "Все включено"
+                departure = state.booking.departure,
+                arrivalCountry = state.booking.arrivalCountry,
+                tourDateStart = state.booking.tourDateStart,
+                tourDateStop = state.booking.tourDateStop,
+                numberOfNights = state.booking.numberOfNights,
+                hotelName = state.booking.hotelName,
+                room = state.booking.room,
+                nutrition = state.booking.nutrition
             )
             CustomerInfo(
                 modifier = Modifier
@@ -153,7 +162,10 @@ fun BookingScreen(
                     .padding(top = 8.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                tourPrice = state.booking.tourPrice,
+                fuelCharge = state.booking.fuelCharge,
+                serviceCharge = state.booking.serviceCharge
             )
         }
         LazyBottomBar(
@@ -437,8 +449,16 @@ fun AddTourist(
 
 @Composable
 fun ToPay(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tourPrice: Int,
+    fuelCharge: Int,
+    serviceCharge: Int
 ) {
+    val numberFormat = NumberFormat.getNumberInstance()
+    numberFormat.maximumFractionDigits = 0
+
+    val sum = fuelCharge + fuelCharge + serviceCharge
+
     Column(
         modifier = modifier
     ) {
@@ -446,28 +466,28 @@ fun ToPay(
             modifier = modifier
                 .padding(top = 16.dp),
             text = "Тур",
-            textSum = "186 600 ₽",
+            textSum = "${numberFormat.format(tourPrice)} ₽",
             itTotal = false
         )
         PaySum(
             modifier = modifier
                 .padding(top = 16.dp),
             text = "Топливный сбор",
-            textSum = "9 300 ₽",
+            textSum = "${numberFormat.format(fuelCharge)} ₽",
             itTotal = false
         )
         PaySum(
             modifier = modifier
                 .padding(top = 16.dp),
             text = "Сервисный сбор",
-            textSum = "2 136 ₽",
+            textSum = "${numberFormat.format(serviceCharge)} ₽",
             itTotal = false
         )
         PaySum(
             modifier = modifier
                 .padding(top = 16.dp, bottom = 16.dp),
             text = "К оплате",
-            textSum = "198 036 ₽",
+            textSum = "${numberFormat.format(sum)} ₽",
             itTotal = true
         )
     }

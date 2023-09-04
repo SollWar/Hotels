@@ -21,32 +21,53 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.z3rg.domain.models.AboutTheHotel
+import ru.z3rg.domain.models.Hotel
 import ru.z3rg.hotels.R
+import ru.z3rg.hotels.ui.screens.hotel.models.HotelScreenState
 import ru.z3rg.hotels.ui.screens.share.*
 import ru.z3rg.hotels.ui.theme.BackGray
 import ru.z3rg.hotels.ui.theme.GrayText
 
 @Preview(backgroundColor = 0xFF26269B, showBackground = true, device = "spec:width=1080px,height=3000px,dpi=440")
 @Composable
-fun HotelScreen(
+fun HotelScreenPreview(
     onRoomSelectClick: () -> Unit = {}
 ) {
-
-    val tagsArray = listOf(
-        "3-я линия",
-        "Бесплатный Wifi на всей территории отеля",
-        "30 км до аэропорта",
-        "1 км до пляжа"
+    HotelScreen(
+        state = HotelScreenState.Display(
+            Hotel(
+                id = 0,
+                name = "Лучший пятизвездочный отель в Хургаде, Египет",
+                address = "Madinat Makadi, Safaga Road, Makadi Bay, Египет",
+                minimalPrice = 134268,
+                priceForIt = "За тур с перелётом",
+                rating = 5,
+                ratingName = "Превосходно",
+                imageUrls = listOf(
+                    "https://www.atorus.ru/sites/default/files/upload/image/News/56149/Club_Priv%C3%A9_by_Belek_Club_House.jpg",
+                    "https://deluxe.voyage/useruploads/articles/The_Makadi_Spa_Hotel_02.jpg",
+                    "https://deluxe.voyage/useruploads/articles/article_1eb0a64d00.jpg"
+                ),
+                aboutTheHotel = AboutTheHotel(
+                    description = "Отель VIP-класса с собственными гольф полями. Высокий уровнь сервиса. Рекомендуем для респектабельного отдыха. Отель принимает гостей от 18 лет!",
+                    peculiarities = listOf(
+                        "Бесплатный Wifi на всей территории отеля",
+                        "1 км до пляжа", "Бесплатный фитнес-клуб",
+                        "20 км до аэропорта"
+                    )
+                )
+            )
+        ),
+        onRoomSelectClick = {onRoomSelectClick()}
     )
+}
 
-    val images = listOf(
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder),
-        painterResource(id = R.drawable.hotel_paceholder)
-    )
-
+@Composable
+fun HotelScreen(
+    state: HotelScreenState.Display,
+    onRoomSelectClick: () -> Unit = {}
+) {
     Box {
         Box(
             modifier = Modifier
@@ -75,20 +96,20 @@ fun HotelScreen(
             ) {
                 Column {
                     ImagesViewer(
-                        images = images
+                        imagesUrls = state.hotel.imageUrls
                     )
                     Description(
-                        rating = 5,
-                        ratingName = "Превосходно",
-                        address = "Madinat Makadi, Safaga Road, Makadi Bay, Египет",
-                        name = "Лучший пятизвездочный отель в Хургаде, Египет"
+                        rating = state.hotel.rating,
+                        ratingName = state.hotel.ratingName,
+                        address = state.hotel.address,
+                        name = state.hotel.name
                     )
                     Price(
                         modifier = Modifier
                             .padding(start = 16.dp, end = 16.dp, bottom = 19.dp),
                         textPrePrice = "от ",
-                        textPrice = 134268,
-                        textForWhat = "За тур с перелётом"
+                        textPrice = state.hotel.minimalPrice,
+                        textForWhat = state.hotel.priceForIt
                     )
                 }
             }
@@ -111,12 +132,12 @@ fun HotelScreen(
                         )
                     )
                     Tags(
-                        tagsArray = tagsArray
+                        tagsArray = state.hotel.aboutTheHotel.peculiarities
                     )
                     Text(
                         modifier = Modifier
                             .padding(bottom = 16.dp),
-                        text = "Отель VIP-класса с собственными гольф полями. Высокий уровнь сервиса. Рекомендуем для респектабельного отдыха. Отель принимает гостей от 18 лет!",
+                        text = state.hotel.aboutTheHotel.description,
                         style = TextStyle(
                             fontSize = 16.sp
                         )

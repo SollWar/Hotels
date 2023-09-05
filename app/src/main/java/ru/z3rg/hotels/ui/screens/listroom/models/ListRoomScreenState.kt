@@ -6,4 +6,6 @@ sealed class ListRoomScreenState {
     data class Display(
         val listRoom: List<Room>
     ): ListRoomScreenState()
+    data object Loading: ListRoomScreenState()
+    data object Error: ListRoomScreenState()
 }

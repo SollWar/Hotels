@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.sp
 fun LazyTopBar(
     modifier: Modifier = Modifier,
     text: String = "",
+    backButton: Boolean = true,
     onButtonClick: () -> Unit = {}
 ) {
     Box(
@@ -38,22 +40,32 @@ fun LazyTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .clip(CircleShape)
-                    .width(32.dp)
-                    .height(32.dp)
-                    .clickable {
-                        onButtonClick()
-                    },
-                imageVector = Icons.Default.KeyboardArrowLeft,
-                contentDescription = "Назад"
-            )
+            if (backButton) {
+                Icon(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .clip(CircleShape)
+                        .width(32.dp)
+                        .height(32.dp)
+                        .clickable {
+                            onButtonClick()
+                        },
+                    imageVector = Icons.Default.KeyboardArrowLeft,
+                    contentDescription = "Назад"
+                )
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .width(32.dp)
+                        .height(32.dp)
+                )
+            }
             Text(
                 text = text,
                 style = TextStyle(
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
                 )
             )
             Spacer(

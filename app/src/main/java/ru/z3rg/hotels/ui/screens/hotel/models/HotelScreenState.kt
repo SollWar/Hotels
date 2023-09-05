@@ -6,4 +6,6 @@ sealed class HotelScreenState {
     data class Display(
         val hotel: Hotel
     ): HotelScreenState()
+    data object Loading: HotelScreenState()
+    data object Error: HotelScreenState()
 }

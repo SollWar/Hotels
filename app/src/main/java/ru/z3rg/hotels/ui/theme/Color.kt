@@ -18,3 +18,5 @@ val BackGray = Color(0xFFFBFBFC)
 val Blue = Color(0xFF0D72FF)
 val Blue10 = Color(0x1A0D72FF)
 val TextFieldBack = Color(0xFFF6F6F9)
+
+val TextFieldError = Color(0x26EB5757)

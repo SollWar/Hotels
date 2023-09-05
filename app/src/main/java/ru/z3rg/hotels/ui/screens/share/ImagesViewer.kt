@@ -13,10 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ru.z3rg.hotels.ui.theme.GrayText
+import ru.z3rg.hotels.R
 
 @Preview(backgroundColor = 0xFFFEFEFE, showBackground = true)
 @Composable
@@ -59,6 +61,7 @@ fun ImagesViewer(
                         .clip(RoundedCornerShape(20.dp)),
                     contentScale = ContentScale.Crop,
                     model = imagesUrls[it],
+                    error = painterResource(id = R.drawable.image_placeholder),
                     contentDescription = "Hotel Image"
                 )
                 Spacer(modifier = Modifier.width(1.dp))

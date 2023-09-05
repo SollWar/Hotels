@@ -7,4 +7,9 @@ data class TouristData(
     var nationality: String = "",
     var pasNumber: String = "",
     var pasValidPeriod: String = ""
-)
+) {
+    fun isValidData(): Boolean {
+        return (firstName.isNotEmpty() && secondName.isNotEmpty() && dateOfBirth.isNotEmpty()
+                && nationality.isNotEmpty() && pasNumber.isNotEmpty() && pasValidPeriod.isNotEmpty())
+    }
+}

@@ -67,7 +67,8 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onBackClick = {
                                     navController.popBackStack()
-                                }
+                                },
+                                onEvent = bookingScreenViewModel::onEvent
                             )
                         }
                         composable(route = "success") {

@@ -12,7 +12,8 @@ import ru.z3rg.hotels.ui.screens.share.screens.ScreenLoading
 fun BookingScreen(
     viewModel: BookingScreenViewModel,
     onCheckoutClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onEvent: (BookingScreenEvent) -> Unit
 ) {
     viewModel.onEvent(BookingScreenEvent.Enter)
     val state = viewModel.state.collectAsState()
@@ -22,7 +23,8 @@ fun BookingScreen(
             BookingScreenDisplay(
                 state = state.value as BookingScreenState.Display,
                 onCheckoutClick = onCheckoutClick,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
+                onEvent = onEvent
             )
         }
         is BookingScreenState.Loading -> {

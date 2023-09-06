@@ -36,6 +36,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.z3rg.domain.models.Booking
 import ru.z3rg.domain.models.TouristData
+import ru.z3rg.hotels.ui.screens.booking.models.BookingScreenEvent
 import ru.z3rg.hotels.ui.screens.booking.models.BookingScreenState
 import ru.z3rg.hotels.ui.screens.share.*
 import ru.z3rg.hotels.ui.screens.utils.MaskVisualTransformation
@@ -71,7 +72,8 @@ fun BookingScreenDisplayPreview() {
             tourist = remember { mutableStateListOf(TouristData()) }
         ),
         onCheckoutClick = {},
-        onBackClick = {}
+        onBackClick = {},
+        onEvent = {}
     )
 }
 
@@ -84,7 +86,8 @@ const val DATE_LENGTH = 8
 fun BookingScreenDisplay(
     state: BookingScreenState.Display,
     onCheckoutClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onEvent: (BookingScreenEvent) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false)  }
     var alertText by remember { mutableStateOf("") }
@@ -134,7 +137,8 @@ fun BookingScreenDisplay(
                     .padding(bottom = 8.dp, top = 8.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.White),
-                state
+                state,
+                onEvent
             )
             Column(
                 modifier = Modifier
@@ -149,7 +153,9 @@ fun BookingScreenDisplay(
                             onDeleteClick = {
                                 state.tourist.remove(it)
                             },
-                            tourist = it,
+                            onEvent = onEvent,
+                            state = state,
+                            index = index,
                             touristNumber = numberTouristFromIndex(index)
                         )
                     }
@@ -264,11 +270,9 @@ fun isValidEmail(email: String): Boolean {
 @Composable
 fun CustomerInfo(
     modifier: Modifier,
-    state: BookingScreenState.Display
+    state: BookingScreenState.Display,
+    onEvent: (BookingScreenEvent) -> Unit
 ) {
-    var phone by remember { mutableStateOf(state.phone)}
-    var email by remember { mutableStateOf(state.email)}
-
     Column(
         modifier = modifier
     ) {
@@ -284,16 +288,15 @@ fun CustomerInfo(
         LazyTextField(
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-            value = phone,
-            isError = (phone.length != 10),
+            value = state.phone,
+            isError = (state.phone.length != 10),
             labelText = "Номер телефона",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
             onValueChange = {
                 if (it.length <= NUMBER_LENGTH) {
-                    phone = it
-                    state.phone = it
+                    onEvent(BookingScreenEvent.PhoneUpdate(it))
                 }
             },
             visualTransformation = MaskVisualTransformation(NUMBER_MASK)
@@ -301,15 +304,14 @@ fun CustomerInfo(
         LazyTextField(
             modifier = Modifier
                 .padding(horizontal = 16.dp),
-            value = email,
-            isError = !isValidEmail(email),
+            value = state.email,
+            isError = !isValidEmail(state.email),
             labelText = "Почта",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
             ),
             onValueChange = {
-                email = it
-                state.email = it
+                onEvent(BookingScreenEvent.EmailUpdate(it))
             }
         )
         Text(
@@ -328,17 +330,13 @@ fun CustomerInfo(
 fun Tourist(
     modifier: Modifier = Modifier,
     onDeleteClick: () -> Unit = {},
+    onEvent: (BookingScreenEvent) -> Unit,
     touristNumber: String,
-    tourist: TouristData
+    state: BookingScreenState.Display,
+    index: Int
 ) {
-    var collapse by remember { mutableStateOf(false) }
-    var firstName by remember { mutableStateOf(tourist.firstName)}
-    var secondName by remember { mutableStateOf(tourist.secondName)}
-    var dateOfBirth by remember { mutableStateOf(tourist.dateOfBirth)}
-    var nationality by remember { mutableStateOf(tourist.nationality)}
-    var pasNumber by remember { mutableStateOf(tourist.pasNumber)}
-    var pasValidPeriod by remember { mutableStateOf(tourist.pasValidPeriod)}
 
+    var collapse by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -377,43 +375,43 @@ fun Tourist(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Имя",
-                    value = firstName,
-                    isError = firstName.isEmpty(),
+                    value = state.tourist[index].firstName,
+                    isError = state.tourist[index].firstName.isEmpty(),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
                         autoCorrect = true
                     ),
                     onValueChange = {
-                        firstName = it
-                        tourist.firstName = it
+                        onEvent(BookingScreenEvent.TouristEvent.UpdateFirstName(index, it))
                     }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Фамилия",
-                    value = secondName,
-                    isError = secondName.isEmpty(),
+                    value = state.tourist[index].secondName,
+                    isError = state.tourist[index].secondName.isEmpty(),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
                         autoCorrect = true
                     ),
                     onValueChange = {
-                        secondName = it
-                        tourist.secondName = it
+                        onEvent(BookingScreenEvent.TouristEvent.UpdateSecondName(index, it))
                     }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Дата рождения",
-                    value = dateOfBirth,
-                    isError = dateOfBirth.isEmpty(),
+                    value = state.tourist[index].dateOfBirth,
+                    isError = state.tourist[index].dateOfBirth.length < 8,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
                     visualTransformation = MaskVisualTransformation(DATE_MASK),
                     onValueChange = {
                         if (it.length <= DATE_LENGTH) {
-                            dateOfBirth = it
-                            tourist.dateOfBirth = it
+                            onEvent(BookingScreenEvent.TouristEvent.UpdateDateOfBirth(index, it))
                         }
                     }
                 )
@@ -421,42 +419,42 @@ fun Tourist(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Гражданство",
-                    value = nationality,
-                    isError = nationality.isEmpty(),
+                    value = state.tourist[index].nationality,
+                    isError = state.tourist[index].nationality.isEmpty(),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
                         autoCorrect = true
                     ),
                     onValueChange = {
-                        nationality = it
-                        tourist.nationality = it
+                        onEvent(BookingScreenEvent.TouristEvent.UpdateNationality(index, it))
                     }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     labelText = "Номер загранпаспорта",
-                    value = pasNumber,
-                    isError = pasNumber.isEmpty(),
+                    value = state.tourist[index].pasNumber,
+                    isError = state.tourist[index].pasNumber.isEmpty(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
                     ),
                     onValueChange = {
-                        pasNumber = it
-                        tourist.pasNumber = it
+                        onEvent(BookingScreenEvent.TouristEvent.UpdatePasNumber(index, it))
                     }
                 )
                 LazyTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     labelText = "Срок действия загранпаспорта",
-                    value = pasValidPeriod,
-                    isError = pasValidPeriod.isEmpty(),
+                    value = state.tourist[index].pasValidPeriod,
+                    isError = state.tourist[index].pasValidPeriod.length < 8,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
                     visualTransformation = MaskVisualTransformation(DATE_MASK),
                     onValueChange = {
                         if (it.length <= DATE_LENGTH) {
-                            pasValidPeriod = it
-                            tourist.pasValidPeriod = it
+                            onEvent(BookingScreenEvent.TouristEvent.UpdatePasValidPeriod(index, it))
                         }
                     }
                 )
